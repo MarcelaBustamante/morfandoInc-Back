@@ -1,0 +1,1721 @@
+openapi: 3.0.2
+info:
+  title: Restaurants API
+  description: |
+    This is the api specification for the morfando app backend. All endpoints except those related to login or signup
+    use a jwt token that must be passed as a Authorization header using Bearer auth.
+    The jwt token can be obtained either with the `auth/token` endpoint, to login with a supported login provider (i.e google) with the `/users/login` endpoint, to login as a parter user.
+
+    Some useful links:
+    - [The Morfando backend repository](https://github.com/Aplicaciones-Distribuidas-Grupo-5/restaurants-api)
+    - [The Morfando app repository](https://github.com/Aplicaciones-Distribuidas-Grupo-5/restaurant-app)
+  version: 1.0.0
+servers:
+  - url: https://morfando.com/v1
+paths:
+  /auth/token:
+    post:
+      tags:
+      - Auth
+      operationId: postToken
+      summary: Get a jwt for bearer authentication
+      description: |
+        This endpoint is used to get a jwt token to authenticate when using most endpoints
+        The supported providers are:
+        - Google 
+        
+        This endpoint generates a jwt with the `client` user role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                $ref: "#/components/schemas/OauthLoginRequest"   
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Invalid id token
+        "500":
+          description: Unknown Error
+  /auth/send-otp:
+    post:
+      tags:
+      - Auth
+      operationId: sendOtp
+      summary: Sends an otp to the user registered email address
+      description: |
+        This endpoint is used generate an otp to reset a partner user's password.
+        If it's a valid email of an existing user an otp (6 digits code) will be sent.
+        User roles required to use this endpoint:
+        - `partner`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOtpRequest"
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unknown Error
+  /auth/password-update:
+    post:
+      tags:
+      - Auth
+      operationId: passwordReset
+      summary: Reset partner user's password
+      description: |
+        This endpoint is used to reset a partner user's password.
+        The otp must have been generated using the endpoint `/users/send-otp` and be related to the same email address.
+        User roles required to use this endpoint:
+        - `partner`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaswordUpdateRequest"   
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+  /users:
+    post:
+      tags:
+      - Users
+      operationId: postUser
+      summary: Create a new partner user
+      description: |
+        This endpoint is used to create a new partner user.
+        The resulting login credentials can be used on the endpoint `/users/login` to generate a jwt with the `parter` user role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Unknown Error
+          
+  /users/login:
+    post:
+      tags:
+      - Users
+      operationId: userLogin
+      summary: Login as a partner user
+      description: |
+        This endpoint is used to login a partner user.
+        User roles required to use this endpoint:
+        - `partner`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+  /users/{id}:
+    get:
+      tags:
+      - Users
+      operationId: getUserById
+      summary: Get a specific user by id
+      description: |
+        This endpoint is used to get information about the user.
+        If the user requested does not match the `sub` claim on the jwt only the `name` and `profilePicture` fields will be returned.
+
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      parameters:
+        - name: id
+          in: path
+          description: Id of the user to be retrieved
+          required: true
+          schema:
+            type: string
+            example: "1234"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUser"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "404":
+          description: User not found
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+      security:
+      - BearerAuth: []
+    put:
+      tags:
+      - Users
+      operationId: putUserById
+      summary: Modify a specific user by id
+      description: |
+        This endpoint is used to modify the user.
+        It only can be used to modify the same user as the one present in the `sub` claim of the jwt.
+
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      parameters:
+        - name: id
+          in: path
+          description: Id of the user to be updated
+          required: true
+          schema:
+            type: string
+            example: "1234"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "404":
+          description: User not found
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+      security:
+      - BearerAuth: []
+    delete:
+      tags:
+      - Users
+      operationId: deleteUserById
+      summary: Delete a specific user by id
+      description: |
+        This endpoint is used to delete the user.
+        It only can be used to delete the same user as the one present in the `sub` claim of the jwt.
+
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      parameters:
+        - name: id
+          in: path
+          description: Id of the user to be deleted
+          required: true
+          schema:
+            type: string
+            example: "1234"
+      responses:
+        "204":
+          description: Successful Operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "404":
+          description: User not found
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+      security:
+      - BearerAuth: []
+
+  /users/favorites:
+    get:
+      tags:
+        - User's favorites
+      summary: Get all favorite restaurants for the user
+      description: |
+        This endpoint is used get all favorite restaurants.
+        User roles required to use this endpoint:
+        - `client`
+      parameters:
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+      operationId: getUserFavorites
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Restaurant"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+  /users/favorites/{restaurantId}:
+    post:
+      tags:
+        - User's favorites
+      summary: Create a new favorite restaurant for a user
+      description: |
+        This endpoint is used to create a new favorite restaurant.
+        User roles required to use this endpoint:
+        - `client`
+      
+        The favorite restaurant will be linked with the user present in the `sub` claim of the jwt.
+      operationId: postUserFavorites
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to create a favorite for
+          required: true
+          schema:
+            type: string
+            example: 1234
+      responses:
+        "201":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+    delete:
+      tags:
+        - User's favorites
+      summary: Delete a favorite restaurant for a user
+      description: |
+        This endpoint is used to delete a favorite restaurant.
+        User roles required to use this endpoint:
+        - `client`
+
+      operationId: deleteUserFavorites
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to create a favorite for
+          required: true
+          schema:
+            type: string
+            example: 1234
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+  /restaurants:
+    get:
+      tags:
+      - Restaurants
+      operationId: getRestaurants
+      summary: Get all restaurants matching the filters
+      description: |
+        This endpoint is used to get information about all restaurants.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      
+        If the user has the `partner` role this endpoint will return only the restaurants created by the partner.      
+        If the user has the `client` role this endpoint will return all restaurants that match the filters.
+      parameters:
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/lat"
+        - $ref: "#/components/parameters/long"
+        - $ref: "#/components/parameters/radius"
+        - $ref: "#/components/parameters/type"
+        - $ref: "#/components/parameters/rating"
+        - $ref: "#/components/parameters/minPrice"
+        - $ref: "#/components/parameters/maxPrice"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Restaurant"
+        "204":
+          description: Empty Response
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - Restaurants
+      summary: Create a new restaurant
+      description: |
+        This endpoint is used to create a restaurants.
+        User roles required to use this endpoint:
+        - `partner`
+      
+        Once the restaurant it's created it will be linked with the user set as sub in the jwt.
+      operationId: postRestaurant
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Restaurant"
+        required: true
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+  "/restaurants/{id}":
+    get:
+      tags:
+        - Restaurants
+      summary: Get a restaurant by id
+      description: |
+        This endpoint is used to get information about a single restaurants.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      
+        If the user has the `partner` role this endpoint will return data only if the restaurant was created by the partner.      
+        If the user has the `client` role this endpoint will return all data about the restaurant.
+      operationId: getRestaurantById
+      parameters:
+        - name: id
+          in: path
+          description: Id of the restaurant to return
+          required: true
+          schema:
+            type: string
+            example: 1234
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    put:
+      tags:
+        - Restaurants
+      summary: Modify an existing restaurant
+      description: |
+        This endpoint is used to update a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+      
+        The restaurant can be updated only if it was created by the parter in `sub` claim of the jwt.
+      operationId: putRestaurant
+      parameters:
+        - name: id
+          in: path
+          description: Id of the restaurant to be modified
+          required: true
+          schema:
+            type: string
+            example: 1234
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutRestaurant"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - Restaurants
+      summary: Delete an existing restaurant
+      description: |
+        This endpoint is used to delete a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+      
+        The restaurant can be deleted only if it was created by the parter in `sub` claim of the jwt.
+      operationId: deleteRestaurant
+      parameters:
+        - name: id
+          in: path
+          description: Id of the restaurant to be deleted
+          required: true
+          schema:
+            type: string
+            example: 1234
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+  /restaurants/types:
+    get:
+      tags:
+      - Restaurants
+      operationId: getRestaurantsType
+      summary: Get all restaurants types matching the filters
+      description: |
+        This endpoint is used to get information about all restaurants types.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      
+      parameters:
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 2
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/RestaurantType"
+        "204":
+          description: Empty Response
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+      security:
+        - BearerAuth: []
+  "/restaurants/{restaurantId}/reviews":
+    get:
+      tags:
+        - Reviews
+      summary: Get all reviews for a restaurant id
+      description: |
+        This endpoint is used to get all reviews for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      operationId: getRestaurantReviews
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to return
+          required: true
+          schema:
+            type: string
+            example: 1234
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+        - $ref: "#/components/parameters/rating"
+        - $ref: "#/components/parameters/userId"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Review"
+        "204":
+          description: Empty Response
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - Reviews
+      summary: Create a new review for a restaurant id
+      description: |
+        This endpoint is used to post a review for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      operationId: postRestaurantReviews
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to review
+          required: true
+          schema:
+            type: string
+            example: 1234
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Review"
+        required: true
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+  "/restaurants/{restaurantId}/reviews/{id}":
+    get:
+      tags:
+        - Reviews
+      summary: Get a review by id
+      description: |
+        This endpoint is used to get a specific review for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      operationId: getRestaurantReviewsById
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant
+          required: true
+          schema:
+            type: string
+            example: 1234
+        - name: id
+          in: path
+          description: Id of the review to retrieve
+          required: true
+          schema:
+            type: string
+            example: 1234
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Review"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Review not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - Reviews
+      summary: Delete a review by id
+      description: |
+        This endpoint is used to delete a specific review for a restaurant.
+        User roles required to use this endpoint:
+        - `client`
+        
+        The review can only be deleted if it was generated by the user present in the `sub` claim of the jwt.
+      operationId: deleteRestaurantReviewsById
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant
+          required: true
+          schema:
+            type: string
+            example: 1234
+        - name: id
+          in: path
+          description: Id of the review to delete
+          required: true
+          schema:
+            type: string
+            example: 1234
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Review not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+  "/restaurants/{restaurantId}/menuItems":
+    get:
+      tags:
+        - Menu items
+      summary: Get a restaurant's menu items
+      description: |
+        This endpoint is used to get all menu items for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+        
+      operationId: getRestaurantMenuItems
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to return menu items for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: limit
+          in: query
+          description: Number of items to retrieve
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 100
+        - name: offset
+          in: query
+          description: Index of the item from which to list
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 0
+        - name: category
+          in: query
+          description: Category of the menu items
+          required: false
+          schema:
+            type: string
+            example: "Deal of the day"
+        - name: vegan
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: tacc
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 1
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MenuItem"
+        "204":
+          description: Empty response
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    post:
+      tags:
+        - Menu items
+      summary: Create menu items on a restaurant
+      description: |
+        This endpoint is used to create a menu item for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+
+        To be able to create a new menu item the restaurant must be linked to the user present in the `sub` claim of the jwt.
+        
+      operationId: postMenuItem
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to return menu items for
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MenuItem"
+      responses:
+        "201":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+
+  "/restaurants/{restaurantId}/menuItems/{id}":
+    get:
+      tags:
+        - Menu items
+      summary: Get a specific restaurant's menu item
+      description: |
+        This endpoint is used to get all menu items for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+        
+      operationId: getMenuItemById
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to return menu items for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: id
+          in: path
+          description: Id of menu item to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "204":
+          description: Empty response
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    put:
+      tags:
+        - Menu items
+      summary: Update a specific restaurant's menu item
+      description: |
+        This endpoint is used to modify a menu item for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+
+        To be able to modify a menu item the restaurant must be linked to the user present in the `sub` claim of the jwt.
+      operationId: putMenuItem
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to return menu items for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: id
+          in: path
+          description: Id of menu item to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutMenuItem"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+    delete:
+      tags:
+        - Menu items
+      summary: Delete a specific restaurant's menu item
+      description: |
+        This endpoint is used to delete a menu item for a restaurant.
+        User roles required to use this endpoint:
+        - `partner`
+
+        To be able to delete a menu item the restaurant must be linked to the user present in the `sub` claim of the jwt.
+      operationId: deleteMenuItem
+      parameters:
+        - name: restaurantId
+          in: path
+          description: Id of the restaurant to return menu items for
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: id
+          in: path
+          description: Id of menu item to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Successful operation
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+        "404":
+          description: Restaurant not found
+        "500":
+          description: Unknown Error
+      security:
+        - BearerAuth: []
+
+  /restaurants/menuItems/types:
+    get:
+      tags:
+        - Menu items
+      operationId: getMenuItemTypes
+      summary: Get all menu item types matching the filters
+      description: |
+        This endpoint is used to get information about all menu item types.
+        User roles required to use this endpoint:
+        - `partner`
+        - `client`
+      
+      parameters:
+        - $ref: "#/components/parameters/offset"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    format: int64
+                    example: 2
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/MenuItemType"
+        "204":
+          description: Empty Response
+        "400":
+          description: Failed Operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authorization Failed
+        "403":
+          description: Operation not allowed
+      security:
+        - BearerAuth: []
+components:
+  parameters:
+    limit:
+      name: limit
+      in: query
+      description: Number of items to retrieve
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+        maximum: 100
+        default: 100
+    offset:
+      name: offset
+      in: query
+      description: Index of the item from which to retrieve
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+        default: 0
+    lat:
+      name: lat
+      in: query
+      description: Geolocation latitude
+      required: false
+      schema:
+        type: integer
+        format: int64
+        example: 34.00044444
+    type:
+      name: type
+      in: query
+      description: Restaurant type
+      required: false
+      schema:
+        type: string
+        example: "Chinese"
+    radius:
+      name: radius
+      in: query
+      description: Geolocation distance radius
+      required: false
+      schema:
+        type: integer
+        format: int64
+        example: 10
+    long:
+      name: long
+      in: query
+      description: Geolocation longitude
+      required: false
+      schema:
+        type: integer
+        format: int64
+        example: -44.00123333
+    minPrice:
+      name: minPrice
+      in: query
+      description: Minimum price range
+      required: false
+      schema:
+        $ref: "#/components/schemas/PriceEnum"
+    maxPrice:
+      name: maxPrice
+      in: query
+      description: Maximum price range
+      required: false
+      schema:
+        $ref: "#/components/schemas/PriceEnum"
+    rating:
+      name: rating
+      in: query
+      description: Review rating
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+        maximum: 5
+        example: 4
+    userId:
+      name: userId
+      in: query
+      description: UserId that posted the review rating
+      required: false
+      schema:
+        type: string
+        example: "1234"
+  schemas:
+    SendOtpRequest:
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          example: useremail@gmail.com
+    PaswordUpdateRequest:
+      required:
+        - email
+        - newPassword
+        - otp
+      properties:
+        email:
+          type: string
+          example: useremail@gmail.com
+        password:
+          type: string
+          example: S3cureP@sword123
+        otp:
+          type: string
+          example: 123456
+    OauthLoginRequest:
+      required:
+        - providerId
+        - idToken
+      properties:
+        providerId:
+          type: string
+          example: "google"
+        idToken:
+          type: string
+          example: "ya29.a0AVA9y1vZyRb-zXeCgWocVFf8rJIj-3qiaiHZGv2RDRSDRK11IxdUrMuJ1TiuPgJhpa9my_eeQnXwLJh11C90eL7YY4kTEW5QKBi7F25K7aKuuN3XGW2jdawOlXg85pWyXkp88TBwVAWFphswbDxvCAnVF-bxaCgYKATASARASFQE65dr8n9dqEwkkL2iVJxiWOX0YXQ0163"
+    GetUser:
+      properties:
+        id:
+          type: string
+          example: "12345"
+        name:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          example: useremail@gmail.com
+        profilePicture:
+          type: string
+          example: "https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"
+
+    User:
+      required:
+        - name
+        - lastName
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          example: useremail@gmail.com
+        profilePicture:
+          type: string
+          example: "https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"
+        password:
+          type: string
+          example: S3cureP@sword123
+
+    MenuItemType:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        photo:
+          type: string
+      example:
+        - id: 1234
+          name: Pizza
+          photo: "https://images.hola.com/imagenes/cocina/recetas/20220208204252/pizza-pepperoni-mozzarella/1-48-890/pepperoni-pizza-abob-m.jpg"
+        - id: 5678
+          name: Pasta
+          photo: "https://www.lavanguardia.com/files/image_948_465/files/fp/uploads/2020/09/09/5f58b1bb6d322.r_d.627-418.jpeg"
+
+    RestaurantType:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      example:
+        - id: 1234
+          name: Mexican
+        - id: 5678
+          name: Chinese
+
+    Restaurant:
+      type: object
+      required:
+        - name
+        - status
+        - type
+        - priceRange
+        - address
+        - photos
+      properties:
+        id:
+          type: string
+          example: "12345"
+        name:
+          type: string
+          example: "John Doe"
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - closed permanently
+          default: open
+        type:
+          type: string
+          example: "Mexican"
+        priceRange:
+          $ref: "#/components/schemas/PriceEnum"
+        address:
+          $ref: "#/components/schemas/Address"
+        photos:
+          type: array
+          items:
+            type: string
+            example: https://www.marketingdirecto.com/wp-content/uploads/2022/02/mcdonalds-metaverso.jpg
+    PutRestaurant:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+            - closed permanently
+          default: open
+        type:
+          type: string
+          example: "Mexican"
+        priceRange:
+          $ref: "#/components/schemas/PriceEnum"
+        address:
+          $ref: "#/components/schemas/Address"
+        photos:
+          type: array
+          items:
+            type: string
+            example: https://www.marketingdirecto.com/wp-content/uploads/2022/02/mcdonalds-metaverso.jpg
+
+    Address:
+      description: "Business address"
+      type: object
+      properties:
+        street:
+          type: string
+          example: "Lima"
+        number:
+          type: string
+          example: "775"
+        neighborhood:
+          type: string
+          example: "Montserrat"
+        city:
+          type: string
+          example: "Buenos Aires"
+        province:
+          type: string
+          example: "Buenos Aires"
+        zipCode:
+          type: string
+          example: "C1073AAO"
+        businessHours:
+          type: array
+          items:
+            type: object
+            properties:
+              day:
+                type: string
+                enum:
+                  - Monday
+                  - Tuesday
+                  - Wednesday
+                  - Thursday
+                  - Friday
+                  - Saturday
+                  - Sunday
+              from:
+                description: "Opening hour in the format 'HHMM'"
+                type: string
+                example: "0800"
+              to:
+                description: "Closing hour in the format 'HHMM'"
+                type: string
+                example: "2000"
+
+    MenuItem:
+      type: object
+      required:
+        - category
+        - type
+        - name
+        - vegan
+        - tacc
+        - ingredients
+        - photos
+      properties:
+        id:
+          type: string
+          example: "12345"
+        category:
+          type: string
+          example: "Deal of the day"
+        type:
+          type: string
+          enum:
+            - Dish
+            - Dessert
+            - Drink
+        name:
+          type: string
+          example: "Fried chicken - 10 piece"
+        vegan:
+          type: boolean
+          example: false
+        tacc:
+          type: boolean
+          example: false
+        ingredients:
+          $ref: "#/components/schemas/Ingredient"
+        photos:
+          type: array
+          items:
+            type: string
+            example: https://previews.123rf.com/images/magone/magone1511/magone151100012/47903492-fresca-sabrosa-hamburguesa-en-el-fondo-negro.jpg?fj=1
+    PutMenuItem:
+      type: object
+      properties:
+        category:
+          type: string
+          example: "Deal of the day"
+        type:
+          type: string
+          enum:
+            - Dish
+            - Dessert
+            - Drink
+        name:
+          type: string
+          example: "Fried chicken - 10 piece"
+        vegan:
+          type: boolean
+          example: false
+        tacc:
+          type: boolean
+          example: false
+        ingredients:
+          $ref: "#/components/schemas/Ingredient"
+        photos:
+          type: array
+          items:
+            type: string
+            example: https://previews.123rf.com/images/magone/magone1511/magone151100012/47903492-fresca-sabrosa-hamburguesa-en-el-fondo-negro.jpg?fj=1
+    Review:
+      type: object
+      required:
+        - comment
+        - rating
+      properties:
+        comment:
+          description: "User's review comment"
+          type: string
+          example: Great food and ambience
+        rating:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 5
+
+    Ingredient:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "12345"
+        name:
+          type: string
+          example: "Chicken"
+
+    LoginRequest:
+      required:
+        - email
+        - password
+      type: object
+      properties:
+        email:
+          type: string
+          example: useremail@gmail.com
+        password:
+          type: string
+          example: Str0ngP@sword123
+
+    LoginResponse:
+      description: ""
+      type: object
+      properties:
+        sub:
+          type: string
+          example: "1234"
+          description: ""
+        exp:
+          type: string
+          description: The expiry time of the token in unix format
+          example: "1694470687"
+        token:
+          description: JWT to be used in Bearer Authorization
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0IiwiaWF0IjoxNjYyOTI0MDg1LCJleHAiOjE2OTQ0NzA2ODd9.Peo8wbuwAcNH5k8OAKeh8KiIbFd9jl3owTlD0_xvkMs
+
+    ErrorResponse:
+      description: ""
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      example:
+        code: ERR123
+        message: An error has occurred
+
+    PriceEnum:
+      type: string
+      enum:
+        - $
+        - $$
+        - $$$
+        - $$$$
+      x-enum-varnames:
+        - $
+        - $$
+        - $$$
+        - $$$$
+
+  responses:
+    ErrorResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+      description: ""
+  securitySchemes:
+    BearerAuth:
+      scheme: bearer
+      type: http
+      description: Bearer token authentication
+tags:
+- name: Auth
+  description: "Operations about authorization"
+- name: Users
+  description: "Operations about users"
+- name: User's favorites
+  description: "Operations about user's favorite restaurants"
+- name: Restaurants
+  description: "Operations about restaurants"
+- name: Reviews
+  description: "Operations about restaurant reviews"
+- name: Menu items
+  description: "Operations about restaurant's menu items"
