@@ -1,4 +1,4 @@
-package com.morfando.restaurantservice.users.model;
+package com.morfando.restaurantservice.users.model.entity;
 
 /**
  * Possible user types
