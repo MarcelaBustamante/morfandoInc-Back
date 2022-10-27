@@ -9,6 +9,7 @@ import com.morfando.restaurantservice.users.application.DeleteUser;
 import com.morfando.restaurantservice.users.application.FindUser;
 import com.morfando.restaurantservice.users.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +31,8 @@ import java.io.IOException;
 @RequestMapping("/users")
 public class UsersController {
 
-//	@PreAuthorize("hasAuthority('SCOPE_CUSTOMER')")
-//	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")
+	//	@PreAuthorize("hasAuthority('SCOPE_CUSTOMER')")
+	//	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")
 
 	private final FindUser findUser;
 	private final Authenticate authenticate;
@@ -63,6 +64,7 @@ public class UsersController {
 		response.addCookie(tokenCookie);
 	}
 
+	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")
 	@GetMapping("/{user-id}")
 	public User findUserById(@PathVariable("user-id") long id, Authentication authentication) {
 		return findUser.findById(id, authentication.getName());

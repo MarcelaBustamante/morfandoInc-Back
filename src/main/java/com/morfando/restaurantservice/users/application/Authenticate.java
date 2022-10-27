@@ -64,7 +64,7 @@ public class Authenticate {
 			User user = repo.findByEmailIgnoreCase(profile.getEmail())
 					.orElseGet(() -> {
 						User nUser = new User(profile.getName(), null, profile.getEmail(), null,
-								profile.getPicture(), UserType.CUSTOMER);
+								profile.getPicture(), UserType.CLIENT);
 						return repo.save(nUser);
 					});
 			return buildJwt(user);

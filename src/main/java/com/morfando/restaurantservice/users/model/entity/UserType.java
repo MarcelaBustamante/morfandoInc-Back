@@ -5,5 +5,5 @@ package com.morfando.restaurantservice.users.model.entity;
  */
 public enum UserType {
 	PARTNER,
-	CUSTOMER;
+	CLIENT;
 }

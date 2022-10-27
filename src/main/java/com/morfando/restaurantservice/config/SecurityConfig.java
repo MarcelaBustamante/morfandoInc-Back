@@ -31,26 +31,6 @@ import java.security.interfaces.RSAPublicKey;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
-	private final RSAPrivateKey privateKey;
-	private final RSAPublicKey publicKey;
-
-	public SecurityConfig(@Value("${jwt.keystore.location}") String keyStorePath,
-						  @Value("${jwt.keystore.password}") String keyStorePassword,
-						  @Value("${jwt.keystore.key.alias}") String keyAlias,
-						  @Value("${jwt.keystore.key.password}") String keyPassword) {
-		try (
-				InputStream resourceAsStream = Thread
-						.currentThread().getContextClassLoader().getResourceAsStream(keyStorePath)
-		) {
-			KeyStore ks = KeyStore.getInstance("JKS");
-			ks.load(resourceAsStream, keyStorePassword.toCharArray());
-			this.publicKey = (RSAPublicKey) ks.getCertificate(keyAlias).getPublicKey();
-			this.privateKey = (RSAPrivateKey) ks.getKey(keyAlias, keyPassword.toCharArray());
-		} catch (Exception e) {
-			throw new IllegalStateException("Error setting up jwt keys", e);
-		}
-	}
-
 	@Bean
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
@@ -70,19 +50,7 @@ public class SecurityConfig {
 			.cors()
 			.and().headers().frameOptions().disable()
 			.and().oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-				 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+		 	.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 	 		.build();
-	}
-
-	@Bean
-	JwtDecoder jwtDecoder() {
-		return NimbusJwtDecoder.withPublicKey(publicKey).build();
-	}
-
-	@Bean
-	JwtEncoder jwtEncoder() {
-		JWK jwk = new RSAKey.Builder(publicKey).privateKey(privateKey).build();
-		JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-		return new NimbusJwtEncoder(jwks);
 	}
 }
