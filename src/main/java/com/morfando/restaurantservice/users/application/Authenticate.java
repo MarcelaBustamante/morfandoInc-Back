@@ -1,7 +1,9 @@
 package com.morfando.restaurantservice.users.application;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.scribejava.core.oauth.OAuth20Service;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import com.morfando.restaurantservice.users.model.UserRepository;
 import com.morfando.restaurantservice.users.model.entity.User;
 import com.morfando.restaurantservice.users.model.entity.UserType;
@@ -11,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Instant;
 
 @Service
@@ -19,17 +23,18 @@ public class Authenticate {
 	private final UserRepository repo;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtEncoder jwtEncoder;
-
-	private final JwtDecoder jwtDecoder;
 	private final long expiration;
 
+	private final GoogleIdTokenVerifier googleVerifier;
+
 	public Authenticate(UserRepository repo, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder,
-						JwtDecoder jwtDecoder, @Value("${jwt.expiration:3600}")  long expiration) {
+						JwtDecoder jwtDecoder, @Value("${jwt.expiration:3600}")  long expiration)
+			throws GeneralSecurityException, IOException {
 		this.repo = repo;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtEncoder = jwtEncoder;
-		this.jwtDecoder = jwtDecoder;
 		this.expiration = expiration;
+		this.googleVerifier = new GoogleIdTokenVerifier(GoogleNetHttpTransport.newTrustedTransport(), new GsonFactory());
 	}
 
 	public Jwt authenticate(User user, String providedPassword) {
@@ -39,14 +44,14 @@ public class Authenticate {
 		return buildJwt(user);
 	}
 
-	public Jwt googleAuthentication(String googleJWT) {
+	public Jwt googleAuthentication(String googleTokenId) {
 		try {
-			// validate google JWT
-			jwtDe
-			User user = repo.findByEmailIgnoreCase(profile.getEmail())
+			GoogleIdToken token = googleVerifier.verify(googleTokenId);
+			GoogleIdToken.Payload payload = token.getPayload();
+			User user = repo.findByEmailIgnoreCase(payload.getEmail())
 					.orElseGet(() -> {
-						User nUser = new User(profile.getName(), null, profile.getEmail(), null,
-								profile.getPicture(), UserType.CLIENT);
+						User nUser = new User((String) payload.get("name"), null, payload.getEmail(), null,
+								(String) payload.get("picture"), UserType.CLIENT);
 						return repo.save(nUser);
 					});
 			return buildJwt(user);
