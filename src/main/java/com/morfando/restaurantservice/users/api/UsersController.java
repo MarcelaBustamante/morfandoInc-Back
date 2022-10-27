@@ -11,7 +11,6 @@ import com.morfando.restaurantservice.users.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,12 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -52,16 +46,9 @@ public class UsersController {
 		return new AuthenticationResult(authenticate.authenticate(user, credentials.getPassword()));
 	}
 
-	@GetMapping("/oauth")
-	public void oAuth(@RequestParam(value = "code", required = false) String code, HttpServletResponse response) throws IOException {
-		if (null == code) {
-			log.info("Redirecting to authorization URL...");
-			response.sendRedirect(authenticate.getOAuthURL());
-			return;
-		}
-		Jwt jwt = authenticate.oauth(code);
-		Cookie tokenCookie = new Cookie("auth_token", jwt.getTokenValue());
-		response.addCookie(tokenCookie);
+	@PostMapping("/oauth")
+	public AuthenticationResult googleAuthentication(String code) {
+		return new AuthenticationResult(authenticate.googleAuthentication(code));
 	}
 
 	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")

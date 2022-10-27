@@ -1,22 +1,14 @@
 package com.morfando.restaurantservice.users.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.scribejava.core.model.OAuth2AccessToken;
-import com.github.scribejava.core.model.OAuthRequest;
-import com.github.scribejava.core.model.Response;
-import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
-import com.morfando.restaurantservice.users.api.dto.GoogleUserProfile;
 import com.morfando.restaurantservice.users.model.UserRepository;
 import com.morfando.restaurantservice.users.model.entity.User;
 import com.morfando.restaurantservice.users.model.entity.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -27,18 +19,16 @@ public class Authenticate {
 	private final UserRepository repo;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtEncoder jwtEncoder;
-	private final OAuth20Service oAuthService;
-	private final ObjectMapper objectMapper;
+
+	private final JwtDecoder jwtDecoder;
 	private final long expiration;
 
 	public Authenticate(UserRepository repo, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder,
-						OAuth20Service oAuthService, ObjectMapper objectMapper,
-						@Value("${jwt.expiration:3600}")  long expiration) {
+						JwtDecoder jwtDecoder, @Value("${jwt.expiration:3600}")  long expiration) {
 		this.repo = repo;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtEncoder = jwtEncoder;
-		this.oAuthService = oAuthService;
-		this.objectMapper = objectMapper;
+		this.jwtDecoder = jwtDecoder;
 		this.expiration = expiration;
 	}
 
@@ -49,18 +39,10 @@ public class Authenticate {
 		return buildJwt(user);
 	}
 
-	public String getOAuthURL() {
-		return oAuthService.getAuthorizationUrl();
-	}
-
-	public Jwt oauth(String code) {
+	public Jwt googleAuthentication(String googleJWT) {
 		try {
-			OAuth2AccessToken token = oAuthService.getAccessToken(code);
-			OAuthRequest request = new OAuthRequest(Verb.GET, "https://www.googleapis.com/oauth2/v1/userinfo?alt=json");
-			oAuthService.signRequest(token, request);
-			Response oAuthResponse = oAuthService.execute(request);
-			log.info("Oauth response: {}", oAuthResponse.getBody());
-			GoogleUserProfile profile = objectMapper.readValue(oAuthResponse.getBody(), GoogleUserProfile.class);
+			// validate google JWT
+			jwtDe
 			User user = repo.findByEmailIgnoreCase(profile.getEmail())
 					.orElseGet(() -> {
 						User nUser = new User(profile.getName(), null, profile.getEmail(), null,
