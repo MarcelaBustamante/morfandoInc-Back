@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 public class UsersController {
 
-	//	@PreAuthorize("hasAuthority('SCOPE_CUSTOMER')")
+	//	@PreAuthorize("hasAuthority('SCOPE_CLIENT')")
 	//	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")
 
 	private final FindUser findUser;
@@ -47,11 +47,10 @@ public class UsersController {
 	}
 
 	@PostMapping("/oauth")
-	public AuthenticationResult googleAuthentication(String code) {
-		return new AuthenticationResult(authenticate.googleAuthentication(code));
+	public AuthenticationResult googleAuthentication(@RequestBody String googleTokenId) {
+		return new AuthenticationResult(authenticate.googleAuthentication(googleTokenId));
 	}
 
-	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")
 	@GetMapping("/{user-id}")
 	public User findUserById(@PathVariable("user-id") long id, Authentication authentication) {
 		return findUser.findById(id, authentication.getName());

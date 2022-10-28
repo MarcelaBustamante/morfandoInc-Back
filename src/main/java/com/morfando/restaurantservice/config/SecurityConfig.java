@@ -40,7 +40,7 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		 return http.authorizeHttpRequests(registry -> registry
 				.antMatchers(HttpMethod.POST,"/users/login").permitAll()
-			 	.antMatchers(HttpMethod.GET,"/users/oauth").permitAll()
+			 	.antMatchers(HttpMethod.POST,"/users/oauth").permitAll()
 				.antMatchers(HttpMethod.POST, "/users").permitAll()
 				.antMatchers("/h2/**").permitAll()
 			 	.antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
