@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 @Slf4j
@@ -24,17 +26,20 @@ public class Authenticate {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtEncoder jwtEncoder;
 	private final long expiration;
-
 	private final GoogleIdTokenVerifier googleVerifier;
 
 	public Authenticate(UserRepository repo, PasswordEncoder passwordEncoder, JwtEncoder jwtEncoder,
-						JwtDecoder jwtDecoder, @Value("${jwt.expiration:3600}")  long expiration)
+						JwtDecoder jwtDecoder, @Value("${jwt.expiration:3600}")  long expiration,
+						@Value("${google-oauth.client-id}") String clientId)
 			throws GeneralSecurityException, IOException {
 		this.repo = repo;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtEncoder = jwtEncoder;
 		this.expiration = expiration;
-		this.googleVerifier = new GoogleIdTokenVerifier(GoogleNetHttpTransport.newTrustedTransport(), new GsonFactory());
+		this.googleVerifier = new GoogleIdTokenVerifier
+				.Builder(GoogleNetHttpTransport.newTrustedTransport(), new GsonFactory())
+				.setAudience(Collections.singletonList(clientId))
+				.build();
 	}
 
 	public Jwt authenticate(User user, String providedPassword) {
