@@ -1,5 +1,6 @@
 package com.morfando.restaurantservice.restaurants.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -33,6 +34,7 @@ public class BusinessHours {
 
 	private LocalTime toTime;
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "restaurant_id")
 	private Restaurant restaurant;

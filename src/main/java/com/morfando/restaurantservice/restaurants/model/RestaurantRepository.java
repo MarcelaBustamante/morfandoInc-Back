@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.ObjectUtils;
 
+import java.util.List;
+
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, JpaSpecificationExecutor<Restaurant> {
 
@@ -37,4 +39,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 			return criteriaBuilder.le(root.get("priceRange"), maxPrice);
 		};
 	}
+
+	List<Restaurant> findByOwner(long owner);
 }

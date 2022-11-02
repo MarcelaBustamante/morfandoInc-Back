@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -46,6 +47,12 @@ public class RestaurantsController {
 	public PaginatedResponse<Restaurant> getRestaurants(@ParameterObject RestaurantFilters filters) {
 		Page<Restaurant> page = getRestaurants.get(filters);
 		return PaginatedResponse.from(page);
+	}
+
+	@PreAuthorize("hasAuthority('SCOPE_PARTNER')")
+	@GetMapping("/me")
+	public List<Restaurant> getRestaurants(Authentication authentication) {
+		return getRestaurants.getMyRestaurants(authentication.getName());
 	}
 
 	@GetMapping("/{id}")

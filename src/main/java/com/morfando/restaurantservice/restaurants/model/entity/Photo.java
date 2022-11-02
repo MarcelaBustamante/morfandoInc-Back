@@ -1,5 +1,6 @@
 package com.morfando.restaurantservice.restaurants.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,7 @@ public class Photo {
 	@Column(length = 2048)
 	private String url;
 
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "restaurant_id")
 	private Restaurant restaurant;
