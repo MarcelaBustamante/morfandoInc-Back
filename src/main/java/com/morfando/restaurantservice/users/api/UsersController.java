@@ -43,7 +43,7 @@ public class UsersController {
 	}
 
 	@PostMapping("/login")
-	public AuthenticationResult login(@RequestBody UserCredentials credentials) {
+	public AuthenticationResult login(@RequestBody @Valid UserCredentials credentials) {
 		User user = findUser.find(credentials.getEmail());
 		return new AuthenticationResult(authenticate.authenticate(user, credentials.getPassword()));
 	}
