@@ -6,6 +6,7 @@ import com.morfando.restaurantservice.restaurants.model.entity.Review;
 import com.morfando.restaurantservice.users.application.FindUser;
 import com.morfando.restaurantservice.users.model.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateReview {
@@ -16,6 +17,8 @@ public class CreateReview {
 		this.repo = repo;
 		this.findUser = findUser;
 	}
+
+	@Transactional
 	public Review create(long restaurantId, NewReview newReview, String userEmail) {
 		User user = findUser.find(userEmail);
 		return repo.save(new Review(newReview.getComment(), newReview.getRating(), restaurantId, user.getId()));

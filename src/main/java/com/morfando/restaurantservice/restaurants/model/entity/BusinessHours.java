@@ -14,6 +14,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
@@ -26,12 +27,12 @@ public class BusinessHours {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_business_hours")
 	private Long id;
-
+	@NotNull
 	@Enumerated(EnumType.STRING)
 	private DayOfWeek dayOfWeek;
-
+	@NotNull
 	private LocalTime fromTime;
-
+	@NotNull
 	private LocalTime toTime;
 
 	@JsonIgnore

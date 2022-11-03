@@ -9,6 +9,7 @@ import com.morfando.restaurantservice.restaurants.model.entity.RestaurantType;
 import com.morfando.restaurantservice.users.application.FindUser;
 import com.morfando.restaurantservice.users.model.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateRestaurant {
@@ -22,6 +23,7 @@ public class CreateRestaurant {
 		this.findUser = findUser;
 	}
 
+	@Transactional
 	public Restaurant create(NewRestaurant newRestaurant, String partnerEmail) {
 		User owner = findUser.find(partnerEmail);
 		RestaurantType type = typeRepo.findById(newRestaurant.getType())

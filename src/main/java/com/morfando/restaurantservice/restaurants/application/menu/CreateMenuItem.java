@@ -5,6 +5,7 @@ import com.morfando.restaurantservice.restaurants.application.ValidateRestaurant
 import com.morfando.restaurantservice.restaurants.model.MenuItemRepository;
 import com.morfando.restaurantservice.restaurants.model.entity.MenuItem;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateMenuItem {
@@ -18,6 +19,7 @@ public class CreateMenuItem {
 		this.validateRestaurantOwner = validateRestaurantOwner;
 	}
 
+	@Transactional
 	public MenuItem create(long restaurantId, NewMenuItem newItem, String partnerEmail) {
 		validateRestaurantOwner.validateOwnership(restaurantId, partnerEmail);
 		double price = null != newItem.getPrice() ? newItem.getPrice() : 0.0D;

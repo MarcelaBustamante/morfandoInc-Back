@@ -9,6 +9,7 @@ import com.morfando.restaurantservice.restaurants.model.entity.RestaurantType;
 import com.morfando.restaurantservice.users.application.FindUser;
 import com.morfando.restaurantservice.users.model.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UpdateRestaurant {
@@ -22,6 +23,7 @@ public class UpdateRestaurant {
 		this.validateRestaurantOwner = validateRestaurantOwner;
 	}
 
+	@Transactional
 	public Restaurant update(long restaurantId, RestaurantUpdate update, String partnerEmail) {
 		Restaurant restaurant = validateRestaurantOwner.validateOwnership(restaurantId, partnerEmail);
 		if (null != update.getName()) {
