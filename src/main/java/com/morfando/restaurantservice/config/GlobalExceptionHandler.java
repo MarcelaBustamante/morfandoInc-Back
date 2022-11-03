@@ -7,11 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -31,10 +35,16 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 	}
 
-	@ExceptionHandler({IllegalArgumentException.class})
+	@ExceptionHandler({IllegalArgumentException.class, MethodArgumentNotValidException.class})
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<ErrorDTO> handleIllegalArgument(Exception ex) {
-		ErrorDTO error = errorDTO("INVALID_ARGUMENT", "Parámetro inválido: " + ex.getMessage(), ex, false);
+		ErrorDTO error = null;
+		if (ex instanceof MethodArgumentNotValidException) {
+			String message = toMessage((MethodArgumentNotValidException) ex);
+			 error = errorDTO("INVALID_ARGUMENT",  message, ex, false);
+		} else {
+			error = errorDTO("INVALID_ARGUMENT", "Parámetro inválido: " + ex.getMessage(), ex, false);
+		}
 		return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
 	}
 
@@ -73,5 +83,16 @@ public class GlobalExceptionHandler {
 	class ErrorDTO {
 		private String code;
 		private String message;
+	}
+
+	private String toMessage(MethodArgumentNotValidException ex) {
+		return ex.getBindingResult().getAllErrors().stream()
+				.map(objectError -> {
+					if (objectError instanceof FieldError) {
+						FieldError fe = ((FieldError) objectError);
+						return "[" + fe.getField() + "] " + fe.getDefaultMessage();
+					}
+					return objectError.getDefaultMessage();
+				}).collect(Collectors.joining(", "));
 	}
 }
