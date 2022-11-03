@@ -41,6 +41,9 @@ public class UpdateMenuItem {
 		if (null != newItem.getVegan()) {
 			menuItem.setVegan(null != newItem.getVegan() && newItem.getVegan());
 		}
+		if (null != newItem.getPrice()) {
+			menuItem.setPrice(newItem.getPrice());
+		}
 		return repo.save(menuItem);
 	}
 }

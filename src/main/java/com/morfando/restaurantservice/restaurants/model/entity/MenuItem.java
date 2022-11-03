@@ -31,10 +31,12 @@ public class MenuItem {
 	private String description;
 	private boolean vegan;
 	private boolean tacc;
+
+	private double price;
 	private String photo;
 
 	public MenuItem(long restaurantId, MenuItemType type, String name, String description, String category,
-					boolean vegan, boolean tacc, String photo) {
+					boolean vegan, boolean tacc, double price, String photo) {
 		this.restaurantId = restaurantId;
 		this.type = type;
 		this.name = name;
@@ -42,6 +44,7 @@ public class MenuItem {
 		this.category = category;
 		this.vegan = vegan;
 		this.tacc = tacc;
+		this.price = price;
 		this.photo = photo;
 	}
 }

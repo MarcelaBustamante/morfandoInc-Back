@@ -11,7 +11,7 @@ public class NewMenuItem {
 	private MenuItemType type;
 	@Schema(example = "hot dishes")
 	private String category;
-	@Schema(example = "Goulash")
+	@Schema(example = "Goulash", required = true)
 	private String name;
 	@Schema(example = "Goulash")
 	private String description;
@@ -19,6 +19,8 @@ public class NewMenuItem {
 	private Boolean vegan;
 	@Schema(defaultValue = "true")
 	private Boolean tacc;
+	@Schema(example = "100.5", required = true)
+	private Double price;
 	@Schema(example = "https://image/image.png")
 	private String photo;
 }
