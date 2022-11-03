@@ -24,7 +24,7 @@ public interface MenuItemRepository extends JpaRepository<MenuItem, Long>, JpaSp
 		return (root, query, criteriaBuilder) -> {
 			if (ObjectUtils.isEmpty(category)) return null;
 			Expression<String> field = criteriaBuilder.lower(root.get("category"));
-			return criteriaBuilder.like(field, "%" + category.toLowerCase() + "%");
+			return criteriaBuilder.equal(field, category.toLowerCase());
 		};
 	}
 
