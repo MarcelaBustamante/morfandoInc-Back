@@ -1,4 +1,5 @@
 application-aws.properties
+application-local_secrets.properties
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar

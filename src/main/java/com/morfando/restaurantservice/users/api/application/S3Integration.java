@@ -21,16 +21,13 @@ public class S3Integration {
 	private final Duration linkExpiration;
 	private final S3Presigner presigner;
 	private final String bucket;
-	private final String bucketBasePath;
 
 	public S3Integration(@Value("${s3.profile:}") String profile,
 						 @Value("${s3.region}") String region,
 						 @Value("${s3.link-expiration:5m}") Duration linkExpiration,
-						 @Value("${s3.bucket.name}") String bucket,
-						 @Value("${s3.bucket.base-path}") String bucketBasePath) {
+						 @Value("${s3.bucket.name}") String bucket) {
 		this.linkExpiration = linkExpiration;
 		this.bucket = bucket;
-		this.bucketBasePath = bucketBasePath;
 		if (StringUtils.isNotBlank(profile)) {
 			this.presigner = S3Presigner.builder()
 					.region(Region.of(region))
@@ -59,6 +56,7 @@ public class S3Integration {
 	}
 
 	private String createFileKey(String originalFileName) {
-		return bucketBasePath + "/" + LocalDateTime.now().format(DTF) + "." + originalFileName;
+		String fileName = originalFileName.replaceAll("\\s+","");
+		return LocalDateTime.now().format(DTF) + "." + fileName;
 	}
 }
