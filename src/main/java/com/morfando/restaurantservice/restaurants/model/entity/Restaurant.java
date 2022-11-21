@@ -8,6 +8,8 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import com.morfando.restaurantservice.users.model.entity.User;
 
 @Entity
 @Setter
@@ -33,6 +35,8 @@ public class Restaurant {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Photo> photos = new ArrayList<>();
 	private long owner;
+	@ManyToMany
+    Set<User> favourites;
 
 	public Restaurant(String name, long owner, RestaurantType type, Address address, int priceRange) {
 		this.name = name;

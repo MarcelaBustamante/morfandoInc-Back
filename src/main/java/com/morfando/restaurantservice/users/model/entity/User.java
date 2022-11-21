@@ -6,14 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
+import java.util.Set;
+import com.morfando.restaurantservice.restaurants.model.entity.Restaurant;
 
 
 @Entity
@@ -46,6 +42,9 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	private UserType type;
+
+	@ManyToMany
+    Set<Restaurant> favourites;
 
 	public User(String name, String lastName, String email, String password, String profilePicture, UserType type) {
 		this.name = name;

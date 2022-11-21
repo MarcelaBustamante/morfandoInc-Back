@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.morfando.restaurantservice.restaurants.application.GetRestaurants;
+import com.morfando.restaurantservice.users.application.HandleFavourite;
+
 import javax.validation.Valid;
 
 @Slf4j
@@ -34,12 +37,16 @@ public class UsersController {
 	private final Authenticate authenticate;
 	private final CreateUser createUser;
 	private final DeleteUser deleteUser;
+	private final GetRestaurants getRestaurants;
+	private final HandleFavourite handleFavourite;
 
-	public UsersController(FindUser findUser, Authenticate authenticate, CreateUser createUser, DeleteUser deleteUser) {
+	public UsersController(FindUser findUser, Authenticate authenticate, CreateUser createUser, DeleteUser deleteUser, GetRestaurants getRestaurants, HandleFavourite handleFavourite) {
 		this.findUser = findUser;
 		this.authenticate = authenticate;
 		this.createUser = createUser;
 		this.deleteUser = deleteUser;
+		this.getRestaurants = getRestaurants;
+		this.handleFavourite = handleFavourite;
 	}
 
 	@PostMapping("/login")
@@ -69,4 +76,15 @@ public class UsersController {
 	public void deleteMyUser(Authentication authentication) {
 		deleteUser.delete(authentication.getName());
 	}
+
+	@PostMapping("/addfavourite/{user-id}/{restaurant-id}")
+	public void addFavourite(@PathVariable("user-id") long idUser,@PathVariable("restaurant-id") long idRestaurant) {
+		handleFavourite.addFavourite(idUser, getRestaurants.getById(idRestaurant));
+	}
+
+	@PostMapping("/deletefavourite/{user-id}/{restaurant-id}")
+	public void deleteFavourite(@PathVariable("user-id") long idUser,@PathVariable("restaurant-id") long idRestaurant) {
+		handleFavourite.deleteFavourite(idUser, getRestaurants.getById(idRestaurant));
+	}
+
 }
