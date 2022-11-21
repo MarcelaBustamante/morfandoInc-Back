@@ -14,8 +14,7 @@ public class AuthenticationResult {
 
 	public AuthenticationResult(Jwt jwt) {
 		Instant expiresAt = jwt.getExpiresAt();
-		assert null != expiresAt;
-		this.expiration = expiresAt.toString();
+		this.expiration = null != expiresAt ? expiresAt.toString() : null;
 		this.subject = jwt.getSubject();
 		this.token = jwt.getTokenValue();
 	}
