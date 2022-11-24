@@ -1,11 +1,11 @@
 package com.morfando.restaurantservice.restaurants.model.entity;
 
-import com.morfando.restaurantservice.restaurants.api.dto.NewRestaurant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,10 +21,10 @@ public class Restaurant {
 	private Long id;
 	@Column(unique = true)
 	private String name;
-	@Enumerated(EnumType.STRING)
+
+	@Transient
 	private RestaurantStatus status;
-	@ManyToOne
-	@JoinColumn(name = "type_id")
+	@Enumerated(EnumType.STRING)
 	private RestaurantType type;
 	@Embedded
 	private Address address;
@@ -52,11 +52,6 @@ public class Restaurant {
 		photo.setRestaurant(this);
 	}
 
-//	public void removePhoto(Photo photo) {
-//		this.photos.remove(photo);
-//		photo.setRestaurant(null);
-//	}
-
 	public void updatePhotos(List<String> photos) {
 		this.photos.forEach(p -> p.setRestaurant(null));
 		this.photos.clear();
@@ -68,13 +63,20 @@ public class Restaurant {
 		hours.setRestaurant(this);
 	}
 
-//	public void removeBusinessHours(BusinessHours hours) {
-//		this.businessHours.remove(hours);
-//		hours.setRestaurant(null);
-//	}
-
 	public void updateBusinessHours(List<BusinessHours> hours) {
 		this.businessHours.forEach(bh -> bh.setRestaurant(null));
 		hours.forEach(this::addBusinessHours);
+	}
+
+	public RestaurantStatus getStatus() {
+		if (null == businessHours || businessHours.isEmpty()) {
+			return RestaurantStatus.CLOSED;
+		}
+		LocalDateTime now = LocalDateTime.now();
+		boolean open = this.businessHours.stream()
+				.filter(bh -> now.getDayOfWeek().equals(bh.getDayOfWeek()))
+				.anyMatch(bh -> bh.getFromTime().isBefore(now.toLocalTime())
+						&& bh.getToTime().isAfter(now.toLocalTime()));
+		return open ? RestaurantStatus.OPEN : RestaurantStatus.CLOSED;
 	}
 }
