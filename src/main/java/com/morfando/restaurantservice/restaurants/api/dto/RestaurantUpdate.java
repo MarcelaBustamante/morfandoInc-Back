@@ -2,6 +2,7 @@ package com.morfando.restaurantservice.restaurants.api.dto;
 
 import com.morfando.restaurantservice.restaurants.model.entity.Address;
 import com.morfando.restaurantservice.restaurants.model.entity.BusinessHours;
+import com.morfando.restaurantservice.restaurants.model.entity.RestaurantType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
@@ -14,8 +15,8 @@ public class RestaurantUpdate {
 
 	@Schema(example = "San Paolo")
 	private String name;
-	@Schema(description = "Restaurant type. See GET /restaurants/types", example = "1")
-	private Long type;
+	@Schema(description = "Restaurant type")
+	private RestaurantType type;
 	private Address address;
 	@Min(1)
 	@Max(4)

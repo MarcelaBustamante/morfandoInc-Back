@@ -6,7 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 @Embeddable
 @Getter
@@ -24,6 +27,13 @@ public class Address {
 	private String city;
 	@Schema(example = "CABA")
 	private String province;
-	@Schema(example = "C1073AAO")
-	private String zipCode;
+	//@Column(precision = 12, scale = 8)
+	@NotNull
+	private Double latitude;
+	@Schema(example = "0.01")
+	private Double latitudeDelta;
+	@NotNull
+	private Double longitude;
+	@Schema(example = "0.01")
+	private Double longitudeDelta;
 }

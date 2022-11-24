@@ -8,12 +8,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-@Entity
-@Setter
-@Getter
-public class RestaurantType {
-	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_restaurant_type")
-	private Long id;
-	private String name;
+public enum RestaurantType {
+	ALEMANA,
+	ARGENTINA,
+	ARMENIA,
+	CHINA,
+	INDIA,
+	JAPONESA,
+	NORTEAMERICANA,
+	PERUANA
 }
