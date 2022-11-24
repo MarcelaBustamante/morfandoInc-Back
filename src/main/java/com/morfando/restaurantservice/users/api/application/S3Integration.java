@@ -8,6 +8,7 @@ import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -45,9 +46,9 @@ public class S3Integration {
 			throw new IllegalStateException("File bigger than max allowed: " + MAX_SIZE_MB + " MB");
 		}
 		String fileKey = createFileKey(nombreArchivo);
-		PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(builder -> builder
+		PresignedUploadPartRequest presignedRequest = presigner.presignUploadPart(builder -> builder
 				.signatureDuration(linkExpiration)
-				.putObjectRequest(req -> req.
+				.uploadPartRequest(req -> req.
 						bucket(bucket)
 						.key(fileKey)
 						.contentLength(bytes))
