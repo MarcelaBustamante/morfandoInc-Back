@@ -32,4 +32,13 @@ public class NewRestaurant {
 	private List<String> photos;
 	@NotEmpty
 	private List<BusinessHours> businessHours;
+
+	public NewRestaurant(String name, RestaurantType type, Address address, Integer priceRange, List<String> photos, List<BusinessHours> businessHours) {
+		this.name = name;
+		this.type = type;
+		this.address = address;
+		this.priceRange = priceRange;
+		this.photos = photos;
+		this.businessHours = businessHours;
+	}
 }

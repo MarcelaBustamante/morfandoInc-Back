@@ -14,6 +14,7 @@ public enum RestaurantType {
 	ARMENIA,
 	CHINA,
 	INDIA,
+	ITALIANA,
 	JAPONESA,
 	NORTEAMERICANA,
 	PERUANA
