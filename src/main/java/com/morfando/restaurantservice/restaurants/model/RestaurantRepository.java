@@ -18,6 +18,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 		nativeQuery = true,
 		value = "SELECT *, ( (ABS(LATITUDE - ?5) + ABS(LONGITUDE - ?6)) / 2 ) AS DIST " +
 				"FROM RESTAURANT WHERE (?1 IS NULL OR TYPE = ?1) " +
+				"AND ACTIVE = true " +
 				"AND (?2 IS NULL OR PRICE_RANGE >= ?2) " +
 				"AND (?3 IS NULL OR PRICE_RANGE <= ?3) " +
 				"AND (?4 IS NULL OR RATING >= ?4) " +

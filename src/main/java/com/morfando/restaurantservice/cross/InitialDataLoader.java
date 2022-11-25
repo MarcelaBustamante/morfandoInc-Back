@@ -55,7 +55,7 @@ public class InitialDataLoader {
 			"https://media-cdn.tripadvisor.com/media/photo-s/0a/43/3f/b7/logo.jpg"
 		);
 		NewRestaurant newRestaurant = new NewRestaurant(
-				"San Paolo", RestaurantType.ITALIANA, address, 1, images, hours);
+				"San Paolo", RestaurantType.ITALIANA, address, 1, images, hours, true);
 
 		Restaurant rest1 = createRestaurant.create(newRestaurant, user.getEmail());
 		NewMenuItem newItem1 = new NewMenuItem();
@@ -94,7 +94,7 @@ public class InitialDataLoader {
 				"https://media-cdn.tripadvisor.com/media/photo-s/16/54/65/1d/photo5jpg.jpg"
 		);
 		NewRestaurant newRestaurant2 = new NewRestaurant(
-				"Nola", RestaurantType.NORTEAMERICANA, address2, 1, images2, hours2);
+				"Nola", RestaurantType.NORTEAMERICANA, address2, 1, images2, hours2, true);
 
 		Restaurant rest2 = createRestaurant.create(newRestaurant2, user.getEmail());
 

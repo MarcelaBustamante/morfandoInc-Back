@@ -18,27 +18,31 @@ public class NewRestaurant {
 
 	@NotBlank
 	@Schema(example = "San Paolo")
-	private String name;
+	private final String name;
 	@NotNull
 	@Schema(description = "Restaurant type")
-	private RestaurantType type;
+	private final RestaurantType type;
 	@NotNull
-	private Address address;
+	private final Address address;
 	@Min(1)
 	@Max(4)
 	@Schema(example = "2")
-	private Integer priceRange;
+	private final Integer priceRange;
 	@Schema(description = "URLs of photos", nullable = true)
-	private List<String> photos;
+	private final List<String> photos;
 	@NotEmpty
-	private List<BusinessHours> businessHours;
+	private final List<BusinessHours> businessHours;
 
-	public NewRestaurant(String name, RestaurantType type, Address address, Integer priceRange, List<String> photos, List<BusinessHours> businessHours) {
+	private final boolean active;
+
+	public NewRestaurant(String name, RestaurantType type, Address address, Integer priceRange, List<String> photos,
+						 List<BusinessHours> businessHours, boolean active) {
 		this.name = name;
 		this.type = type;
 		this.address = address;
 		this.priceRange = priceRange;
 		this.photos = photos;
 		this.businessHours = businessHours;
+		this.active = active;
 	}
 }

@@ -25,4 +25,5 @@ public class RestaurantUpdate {
 	@Schema(description = "URLs of photos", nullable = true)
 	private List<String> photos;
 	private List<BusinessHours> businessHours;
+	private Boolean active;
 }

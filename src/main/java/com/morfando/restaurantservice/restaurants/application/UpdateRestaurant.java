@@ -38,6 +38,9 @@ public class UpdateRestaurant {
 		if (null != update.getBusinessHours()) {
 			restaurant.updateBusinessHours(update.getBusinessHours());
 		}
+		if (null != update.getActive()) {
+			restaurant.setActive(update.getActive());
+		}
 		return repo.save(restaurant);
 	}
 }

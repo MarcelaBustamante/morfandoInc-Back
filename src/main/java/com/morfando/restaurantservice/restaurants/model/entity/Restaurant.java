@@ -10,17 +10,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import com.morfando.restaurantservice.users.model.entity.User;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Setter
 @Getter
 @NoArgsConstructor
+@Table(
+	indexes = {
+		@Index(name = "idx_restaurant_owner", columnList = "owner")
+	}
+)
 public class Restaurant {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_restaurant")
 	private Long id;
 	@Column(unique = true)
 	private String name;
+
+	@ColumnDefault("true")
+	private boolean active;
 
 	@Transient
 	private RestaurantStatus status;
@@ -38,12 +47,13 @@ public class Restaurant {
 	@ManyToMany
     Set<User> favourites;
 
-	public Restaurant(String name, long owner, RestaurantType type, Address address, int priceRange) {
+	public Restaurant(String name, long owner, RestaurantType type, Address address, int priceRange, boolean active) {
 		this.name = name;
 		this.type = type;
 		this.address = address;
 		this.priceRange = priceRange;
 		this.owner = owner;
+		this.active = active;
 	}
 
 	public void addPhoto(String url) {

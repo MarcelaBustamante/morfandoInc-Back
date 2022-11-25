@@ -21,8 +21,8 @@ public class CreateRestaurant {
 	@Transactional
 	public Restaurant create(NewRestaurant newRestaurant, String partnerEmail) {
 		User owner = findUser.find(partnerEmail);
-		Restaurant restaurant = new Restaurant(newRestaurant.getName(), owner.getId(), newRestaurant.getType(), newRestaurant.getAddress(),
-				newRestaurant.getPriceRange());
+		Restaurant restaurant = new Restaurant(newRestaurant.getName(), owner.getId(), newRestaurant.getType(),
+				newRestaurant.getAddress(),	newRestaurant.getPriceRange(), newRestaurant.isActive());
 		if (null != newRestaurant.getPhotos()) {
 			newRestaurant.getPhotos().forEach(restaurant::addPhoto);
 		}
