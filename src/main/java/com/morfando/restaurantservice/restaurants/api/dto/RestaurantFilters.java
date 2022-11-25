@@ -8,8 +8,8 @@ import lombok.Setter;
 public class RestaurantFilters {
 	private Integer page = 0;
 	private Integer pageSize = 20;
-	private String latitude;
-	private String longitude;
+	private Double latitude;
+	private Double longitude;
 	private Integer radius = 10;
 	private String type;
 	private Integer rating;

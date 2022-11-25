@@ -8,6 +8,7 @@ import com.morfando.restaurantservice.users.model.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +28,15 @@ public class GetRestaurants {
 
 	public Page<Restaurant> get(RestaurantFilters filters) {
 		Pageable pageable = PageRequest.of(filters.getPage(), filters.getPageSize());
-		Specification<Restaurant> spec = repo.minRating(filters.getRating())
-				.and(repo.type(filters.getType()))
-				.and(repo.minPriceRange(filters.getMinPrice()))
-				.and(repo.maxPriceRange(filters.getMaxPrice()));
-		return repo.findAll(spec, pageable);
+		if (null != filters.getLatitude() && null != filters.getLongitude()) {
+			Sort sort = Sort.by(Sort.Direction.ASC, "DIST").and(pageable.getSort());
+			pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
+		} else {
+			filters.setLongitude(0.0);
+			filters.setLatitude(0.0);
+		}
+		return repo.findAllWithFilters(filters.getType(), filters.getMinPrice(), filters.getMaxPrice(),
+				filters.getRating(), filters.getLatitude(), filters.getLongitude(), pageable);
 	}
 
 	public Restaurant getById(long id) {

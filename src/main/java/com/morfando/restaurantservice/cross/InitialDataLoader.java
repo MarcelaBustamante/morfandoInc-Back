@@ -43,7 +43,7 @@ public class InitialDataLoader {
 		User user = createUser.createPartner("morfandoapp@mailinator.com", "123", "Usuario",
 				"Test", null);
 		Address address = new Address("Uriarte", "1616", "Palermo", "CABA", "CABA",
-				-34.5872216, 0.01, -58.4319865, 0.01);
+				-34.5871469, 0.01, -58.4320105, 0.01);
 		List<BusinessHours> hours = Arrays.asList(
 			new BusinessHours(DayOfWeek.MONDAY, LocalTime.of(12, 15), LocalTime.of(23, 0)),
 			new BusinessHours(DayOfWeek.TUESDAY, LocalTime.of(12, 15), LocalTime.of(23, 0)),
@@ -82,7 +82,7 @@ public class InitialDataLoader {
 		createMenuItem.create(rest1.getId(), newItem2, user.getEmail());
 
 		Address address2 = new Address("Gorriti", "4389", "Palermo", "CABA", "CABA",
-				-34.5872216, 0.01, -58.4319865, 0.01);
+				-34.5935282, 0.01, -58.4249135, 0.01);
 		List<BusinessHours> hours2 = Arrays.asList(
 				new BusinessHours(DayOfWeek.MONDAY, LocalTime.of(12, 15), LocalTime.of(23, 0)),
 				new BusinessHours(DayOfWeek.TUESDAY, LocalTime.of(12, 15), LocalTime.of(23, 0)),
