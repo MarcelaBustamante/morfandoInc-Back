@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class GetMenuItems {
 	private final MenuItemRepository repo;
@@ -17,13 +19,12 @@ public class GetMenuItems {
 		this.repo = repo;
 	}
 
-	public Page<MenuItem> get(long restaurantId, MenuItemFilters filters) {
-		Pageable pageable = PageRequest.of(filters.getPage(), filters.getPageSize());
+	public List<MenuItem> get(long restaurantId, MenuItemFilters filters) {
 		Specification<MenuItem> spec = repo.restaurantId(restaurantId)
 				.and(repo.vegan(filters.getVegan()))
 				.and(repo.tacc(filters.getTacc()))
 				.and(repo.categoryLike(filters.getCategory()));
-		return repo.findAll(spec, pageable);
+		return repo.findAll(spec);
 	}
 
 	public MenuItem getById(long restaurantId, long menuItemId) {

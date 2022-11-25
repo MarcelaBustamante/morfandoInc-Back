@@ -1,6 +1,7 @@
 package com.morfando.restaurantservice.restaurants.api;
 
 import com.morfando.restaurantservice.cross.dto.PaginatedResponse;
+import com.morfando.restaurantservice.restaurants.api.dto.CategorizedMenuItem;
 import com.morfando.restaurantservice.restaurants.api.dto.MenuItemFilters;
 import com.morfando.restaurantservice.restaurants.api.dto.NewMenuItem;
 import com.morfando.restaurantservice.restaurants.application.menu.CreateMenuItem;
@@ -21,6 +22,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/restaurants/{restaurantId}/menu/items")
 public class RestaurantMenuController {
@@ -39,10 +46,23 @@ public class RestaurantMenuController {
 	}
 
 	@GetMapping
-	public PaginatedResponse<MenuItem> getMenuItems(@PathVariable("restaurantId") long restaurantId,
-													@ParameterObject MenuItemFilters filters) {
-		Page<MenuItem> page = getMenuItems.get(restaurantId, filters);
-		return PaginatedResponse.from(page);
+	public List<MenuItem> getMenuItems(@PathVariable("restaurantId") long restaurantId,
+									   @ParameterObject MenuItemFilters filters) {
+		return getMenuItems.get(restaurantId, filters);
+	}
+
+	@GetMapping("/categorized")
+	public List<CategorizedMenuItem> getCategorizedMenuItems(@PathVariable("restaurantId") long restaurantId,
+															 @ParameterObject MenuItemFilters filters) {
+		List<MenuItem> allItems = getMenuItems.get(restaurantId, filters);
+		Map<String, List<MenuItem>> map = new HashMap<>();
+		allItems.forEach(item -> {
+			List<MenuItem> items = map.computeIfAbsent(item.getCategory(), k -> new ArrayList<>());
+			items.add(item);
+		});
+		return map.entrySet().stream()
+				.map(entry -> new CategorizedMenuItem(entry.getKey(), entry.getValue()))
+				.collect(Collectors.toList());
 	}
 
 	@GetMapping("/{itemId}")

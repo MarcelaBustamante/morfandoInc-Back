@@ -41,10 +41,21 @@ public class MenuItem {
 		this.type = type;
 		this.name = name;
 		this.description = description;
-		this.category = category;
+		this.category = formatCategory(category);
 		this.vegan = vegan;
 		this.tacc = tacc;
 		this.price = price;
 		this.photo = photo;
+	}
+
+	private String formatCategory(String category) {
+		if (null == category) {
+			return "";
+		}
+		category = category.trim().toLowerCase();
+		if (category.length() > 0) {
+			category = category.substring(0, 1).toUpperCase() + category.substring(1);
+		}
+		return category;
 	}
 }

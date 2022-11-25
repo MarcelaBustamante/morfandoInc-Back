@@ -69,14 +69,14 @@ public class InitialDataLoader {
 		newItem1.setTacc(true);
 
 		NewMenuItem newItem2 = new NewMenuItem();
-		newItem1.setName("Aperol Spritz");
-		newItem1.setType(MenuItemType.DISH);
-		newItem1.setCategory("Tragos");
-		newItem1.setDescription("Aperol Spritz");
-		newItem1.setPhoto("https://img.restaurantguru.com/ra7a-beer-San-Paolo-Pizzeria-2022-10.jpg");
-		newItem1.setPrice(850D);
-		newItem1.setVegan(true);
-		newItem1.setTacc(false);
+		newItem2.setName("Aperol Spritz");
+		newItem2.setType(MenuItemType.DRINK);
+		newItem2.setCategory("Tragos");
+		newItem2.setDescription("Aperol Spritz");
+		newItem2.setPhoto("https://img.restaurantguru.com/ra7a-beer-San-Paolo-Pizzeria-2022-10.jpg");
+		newItem2.setPrice(850D);
+		newItem2.setVegan(true);
+		newItem2.setTacc(false);
 
 		createMenuItem.create(rest1.getId(), newItem1, user.getEmail());
 		createMenuItem.create(rest1.getId(), newItem2, user.getEmail());
@@ -99,24 +99,24 @@ public class InitialDataLoader {
 		Restaurant rest2 = createRestaurant.create(newRestaurant2, user.getEmail());
 
 		NewMenuItem newItem3 = new NewMenuItem();
-		newItem1.setName("Pechuga");
-		newItem1.setType(MenuItemType.DISH);
-		newItem1.setCategory("Sandwichs");
-		newItem1.setDescription("Sandwich de pechuga de pollo frito");
-		newItem1.setPhoto("https://media-cdn.tripadvisor.com/media/photo-s/11/a5/d4/c4/photo0jpg.jpg");
-		newItem1.setPrice(1200D);
-		newItem1.setVegan(false);
-		newItem1.setTacc(true);
+		newItem3.setName("Pechuga");
+		newItem3.setType(MenuItemType.DISH);
+		newItem3.setCategory("Sandwichs");
+		newItem3.setDescription("Sandwich de pechuga de pollo frito");
+		newItem3.setPhoto("https://media-cdn.tripadvisor.com/media/photo-s/11/a5/d4/c4/photo0jpg.jpg");
+		newItem3.setPrice(1200D);
+		newItem3.setVegan(false);
+		newItem3.setTacc(true);
 
 		NewMenuItem newItem4 = new NewMenuItem();
-		newItem1.setName("Aperol Spritz");
-		newItem1.setType(MenuItemType.DISH);
-		newItem1.setCategory("Bebidas");
-		newItem1.setDescription("Aperol Spritz");
-		newItem1.setPhoto("https://img.restaurantguru.com/ra7a-beer-San-Paolo-Pizzeria-2022-10.jpg");
-		newItem1.setPrice(820D);
-		newItem1.setVegan(true);
-		newItem1.setTacc(false);
+		newItem4.setName("Aperol Spritz");
+		newItem4.setType(MenuItemType.DRINK);
+		newItem4.setCategory("Bebidas");
+		newItem4.setDescription("Aperol Spritz");
+		newItem4.setPhoto("https://img.restaurantguru.com/ra7a-beer-San-Paolo-Pizzeria-2022-10.jpg");
+		newItem4.setPrice(820D);
+		newItem4.setVegan(true);
+		newItem4.setTacc(false);
 
 		createMenuItem.create(rest2.getId(), newItem3, user.getEmail());
 		createMenuItem.create(rest2.getId(), newItem4, user.getEmail());
