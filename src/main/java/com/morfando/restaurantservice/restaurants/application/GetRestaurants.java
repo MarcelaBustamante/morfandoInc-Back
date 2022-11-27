@@ -45,6 +45,6 @@ public class GetRestaurants {
 
 	public List<Restaurant> getMyRestaurants(String email) {
 		User owner = findUser.find(email);
-		return repo.findByOwner(owner.getId());
+		return repo.findByOwnerAndDeletedFalse(owner.getId());
 	}
 }

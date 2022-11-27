@@ -19,6 +19,7 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 		value = "SELECT *, ( (ABS(LATITUDE - ?5) + ABS(LONGITUDE - ?6)) / 2 ) AS DIST " +
 				"FROM RESTAURANT WHERE (?1 IS NULL OR TYPE = ?1) " +
 				"AND ACTIVE = true " +
+				"AND DELETED = false " +
 				"AND (?2 IS NULL OR PRICE_RANGE >= ?2) " +
 				"AND (?3 IS NULL OR PRICE_RANGE <= ?3) " +
 				"AND (?4 IS NULL OR RATING >= ?4) " +
@@ -26,5 +27,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 	)
 	Page<Restaurant> findAllWithFilters(String type, Integer minPrice, Integer maxPrice, Integer minRating, Double lat,
 										Double lng, Pageable pageable);
-	List<Restaurant> findByOwner(long owner);
+
+	List<Restaurant> findByOwnerAndDeletedFalse(long owner);
 }

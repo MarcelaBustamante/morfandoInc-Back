@@ -1,6 +1,7 @@
 package com.morfando.restaurantservice.restaurants.application;
 
 import com.morfando.restaurantservice.restaurants.model.RestaurantRepository;
+import com.morfando.restaurantservice.restaurants.model.entity.Restaurant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +18,8 @@ public class DeleteRestaurant {
 
 	@Transactional
 	public void delete(long restaurantId, String partnerEmail) {
-		validateRestaurantOwner.validateOwnership(restaurantId, partnerEmail);
-		repo.deleteById(restaurantId);
+		Restaurant restaurant = validateRestaurantOwner.validateOwnership(restaurantId, partnerEmail);
+		restaurant.setDeleted(true);
+		repo.save(restaurant);
 	}
 }

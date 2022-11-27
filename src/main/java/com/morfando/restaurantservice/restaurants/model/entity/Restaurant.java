@@ -28,10 +28,9 @@ public class Restaurant {
 	private Long id;
 	@Column(unique = true)
 	private String name;
-
+	private boolean deleted;
 	@ColumnDefault("true")
 	private boolean active;
-
 	@Transient
 	private RestaurantStatus status;
 	@Enumerated(EnumType.STRING)
@@ -56,6 +55,7 @@ public class Restaurant {
 		this.priceRange = priceRange;
 		this.owner = owner;
 		this.active = active;
+		this.deleted = false;
 	}
 
 	public void addPhoto(String url) {
