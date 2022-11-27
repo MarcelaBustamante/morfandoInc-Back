@@ -8,6 +8,7 @@ import com.morfando.restaurantservice.users.model.UserRepository;
 import com.morfando.restaurantservice.users.model.entity.User;
 import com.morfando.restaurantservice.users.model.entity.UserType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.*;
@@ -18,6 +19,7 @@ import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -49,17 +51,23 @@ public class Authenticate {
 		return buildJwt(user);
 	}
 
-	public Jwt googleAuthentication(String googleTokenId) {
+	/**
+	 * @param googleTokenId
+	 * @return Pair of jwt and boolean indicating if user was created
+	 */
+	public Pair<Jwt, Boolean> googleAuthentication(String googleTokenId) {
 		try {
 			GoogleIdToken token = googleVerifier.verify(googleTokenId);
 			GoogleIdToken.Payload payload = token.getPayload();
-			User user = repo.findByEmailIgnoreCase(payload.getEmail())
-					.orElseGet(() -> {
-						User nUser = new User((String) payload.get("name"), null, payload.getEmail(), null,
-								(String) payload.get("picture"), UserType.CLIENT);
-						return repo.save(nUser);
-					});
-			return buildJwt(user);
+			Optional<User> optional = repo.findByEmailIgnoreCase(payload.getEmail());
+			User user = null;
+			if (optional.isPresent()) {
+				user = new User((String) payload.get("name"), null, payload.getEmail(), null,
+						(String) payload.get("picture"), UserType.CLIENT);
+				user = repo.save(user);
+			}
+			boolean isNewUser = optional.isEmpty();
+			return Pair.of(buildJwt(user), isNewUser);
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}

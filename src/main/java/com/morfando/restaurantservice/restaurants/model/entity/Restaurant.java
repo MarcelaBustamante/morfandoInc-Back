@@ -1,5 +1,6 @@
 package com.morfando.restaurantservice.restaurants.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,6 +45,7 @@ public class Restaurant {
 	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Photo> photos = new ArrayList<>();
 	private long owner;
+	@JsonIgnore
 	@ManyToMany
     Set<User> favourites;
 

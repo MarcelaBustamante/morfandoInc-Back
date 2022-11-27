@@ -1,31 +1,25 @@
 package com.morfando.restaurantservice.users.api;
 
 import com.morfando.restaurantservice.users.api.dto.AuthenticationResult;
+import com.morfando.restaurantservice.users.api.dto.ModifiedUser;
 import com.morfando.restaurantservice.users.api.dto.UserCredentials;
 import com.morfando.restaurantservice.users.api.dto.NewUser;
-import com.morfando.restaurantservice.users.application.Authenticate;
-import com.morfando.restaurantservice.users.application.CreateUser;
-import com.morfando.restaurantservice.users.application.DeleteUser;
-import com.morfando.restaurantservice.users.application.FindUser;
+import com.morfando.restaurantservice.users.application.*;
 import com.morfando.restaurantservice.users.model.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.morfando.restaurantservice.restaurants.application.GetRestaurants;
-import com.morfando.restaurantservice.users.application.HandleFavourite;
 
 import javax.validation.Valid;
 
 @Slf4j
+@AllArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UsersController {
@@ -39,25 +33,18 @@ public class UsersController {
 	private final DeleteUser deleteUser;
 	private final GetRestaurants getRestaurants;
 	private final HandleFavourite handleFavourite;
-
-	public UsersController(FindUser findUser, Authenticate authenticate, CreateUser createUser, DeleteUser deleteUser, GetRestaurants getRestaurants, HandleFavourite handleFavourite) {
-		this.findUser = findUser;
-		this.authenticate = authenticate;
-		this.createUser = createUser;
-		this.deleteUser = deleteUser;
-		this.getRestaurants = getRestaurants;
-		this.handleFavourite = handleFavourite;
-	}
+	private final UpdateUser updateUser;
 
 	@PostMapping("/login")
 	public AuthenticationResult login(@RequestBody @Valid UserCredentials credentials) {
 		User user = findUser.find(credentials.getEmail());
-		return new AuthenticationResult(authenticate.authenticate(user, credentials.getPassword()));
+		return new AuthenticationResult(authenticate.authenticate(user, credentials.getPassword()), false);
 	}
 
 	@PostMapping("/oauth")
 	public AuthenticationResult googleAuthentication(@RequestBody String googleTokenId) {
-		return new AuthenticationResult(authenticate.googleAuthentication(googleTokenId));
+		Pair<Jwt, Boolean> result = authenticate.googleAuthentication(googleTokenId);
+		return new AuthenticationResult(result.getLeft(), result.getRight());
 	}
 
 	@GetMapping("/{user-id}")
@@ -69,6 +56,13 @@ public class UsersController {
 	public User createUser(@RequestBody @Valid NewUser newUser) {
 		return createUser.createPartner(newUser.getEmail(), newUser.getPassword(), newUser.getName(), newUser.getLastName(),
 				newUser.getProfilePicture());
+	}
+
+	@PutMapping
+	public User updateUser(@RequestBody @Valid ModifiedUser modifiedUser, Authentication authentication) {
+		String email = authentication.getName();
+		return updateUser.update(email, modifiedUser.getPassword(), modifiedUser.getName(), modifiedUser.getLastName(),
+				modifiedUser.getProfilePicture());
 	}
 
 	@DeleteMapping
