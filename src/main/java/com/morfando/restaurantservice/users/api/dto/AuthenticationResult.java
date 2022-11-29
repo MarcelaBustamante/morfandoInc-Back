@@ -9,6 +9,7 @@ import java.time.Instant;
 @Getter
 public class AuthenticationResult {
 	private final String subject;
+	private final Long user;
 	private final String expiration;
 	private final String token;
 	private final boolean firstLogin;
@@ -17,6 +18,7 @@ public class AuthenticationResult {
 		Instant expiresAt = jwt.getExpiresAt();
 		this.expiration = null != expiresAt ? expiresAt.toString() : null;
 		this.subject = jwt.getSubject();
+		this.user = jwt.getClaim("user");
 		this.token = jwt.getTokenValue();
 		this.firstLogin = firstLogin;
 	}

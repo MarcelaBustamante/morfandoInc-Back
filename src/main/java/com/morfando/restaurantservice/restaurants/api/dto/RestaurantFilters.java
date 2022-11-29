@@ -15,4 +15,5 @@ public class RestaurantFilters {
 	private Integer rating;
 	private Integer minPrice;
 	private Integer maxPrice;
+	private String search;
 }
