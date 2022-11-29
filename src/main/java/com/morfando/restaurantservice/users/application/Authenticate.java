@@ -61,7 +61,7 @@ public class Authenticate {
 			GoogleIdToken.Payload payload = token.getPayload();
 			Optional<User> optional = repo.findByEmailIgnoreCase(payload.getEmail());
 			User user = null;
-			if (optional.isPresent()) {
+			if (optional.isEmpty()) {
 				user = new User((String) payload.get("name"), null, payload.getEmail(), null,
 						(String) payload.get("picture"), UserType.CLIENT);
 				user = repo.save(user);

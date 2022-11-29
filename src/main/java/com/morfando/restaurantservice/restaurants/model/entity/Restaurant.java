@@ -28,6 +28,7 @@ public class Restaurant {
 	private Long id;
 	@Column(unique = true)
 	private String name;
+	@ColumnDefault("false")
 	private boolean deleted;
 	@ColumnDefault("true")
 	private boolean active;
