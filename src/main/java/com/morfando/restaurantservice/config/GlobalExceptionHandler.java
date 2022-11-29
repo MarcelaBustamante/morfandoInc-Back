@@ -3,6 +3,7 @@ package com.morfando.restaurantservice.config;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -75,7 +76,7 @@ public class GlobalExceptionHandler {
 		} else {
 			log.error("Error: {}", t.getMessage());
 		}
-		return new ErrorDTO(code, message);
+		return new ErrorDTO(code, message, ExceptionUtils.getStackTrace(t));
 	}
 
 	@AllArgsConstructor
@@ -83,6 +84,7 @@ public class GlobalExceptionHandler {
 	class ErrorDTO {
 		private String code;
 		private String message;
+		private String stack;
 	}
 
 	private String toMessage(MethodArgumentNotValidException ex) {
