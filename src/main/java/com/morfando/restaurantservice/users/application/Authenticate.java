@@ -65,6 +65,8 @@ public class Authenticate {
 				user = new User((String) payload.get("name"), null, payload.getEmail(), null,
 						(String) payload.get("picture"), UserType.CLIENT);
 				user = repo.save(user);
+			} else {
+				user = optional.get();
 			}
 			boolean isNewUser = optional.isEmpty();
 			return Pair.of(buildJwt(user), isNewUser);
@@ -84,6 +86,7 @@ public class Authenticate {
 				.issuedAt(now)
 				.expiresAt(now.plusSeconds(expiration))
 				.subject(user.getEmail())
+				.claim("user", user.getId())
 				.claim("scope", user.getType().name())
 				.build();
 		return jwtEncoder.encode(JwtEncoderParameters.from(claims));

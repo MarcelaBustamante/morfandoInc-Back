@@ -23,10 +23,24 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 				"AND (?2 IS NULL OR PRICE_RANGE >= ?2) " +
 				"AND (?3 IS NULL OR PRICE_RANGE <= ?3) " +
 				"AND (?4 IS NULL OR RATING >= ?4) " +
+				"AND (?7 IS NULL OR LOWER(NAME) LIKE ?7) " +
 				"ORDER BY ?#{#pageable}"
 	)
 	Page<Restaurant> findAllWithFilters(String type, Integer minPrice, Integer maxPrice, Integer minRating, Double lat,
-										Double lng, Pageable pageable);
+										Double lng, String search, Pageable pageable);
+
+	@Query(
+			nativeQuery = true,
+			value = "SELECT *, 0 AS DIST " +
+					"FROM RESTAURANT WHERE (?1 IS NULL OR TYPE = ?1) " +
+					"AND ACTIVE = true " +
+					"AND DELETED = false " +
+					"AND (?2 IS NULL OR PRICE_RANGE >= ?2) " +
+					"AND (?3 IS NULL OR PRICE_RANGE <= ?3) " +
+					"AND (?4 IS NULL OR RATING >= ?4) " +
+					"AND (?5 IS NULL OR LOWER(NAME) LIKE ?5) "
+	)
+	Page<Restaurant> findAllWithFiltersLocal(String type, Integer minPrice, Integer maxPrice, Integer minRating, String search, Pageable pageable);
 
 	List<Restaurant> findByOwnerAndDeletedFalse(long owner);
 }
