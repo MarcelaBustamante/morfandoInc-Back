@@ -27,6 +27,9 @@
         </logger>
 
     </springProfile>
+    <logger name="org.springframework.web.filter.CommonsRequestLoggingFilter">
+        <level value="DEBUG" />
+    </logger>
     <logger name="org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod" level="debug" additivity="false">
         <appender-ref ref="STDOUT" />
     </logger>

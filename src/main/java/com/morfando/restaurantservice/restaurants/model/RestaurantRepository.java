@@ -16,7 +16,9 @@ import java.util.List;
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, JpaSpecificationExecutor<Restaurant> {
 	@Query(
 		nativeQuery = true,
-		value = "SELECT *, ( (ABS(LATITUDE - ?5) + ABS(LONGITUDE - ?6)) / 2 ) AS DIST " +
+		value = "SELECT *, " +
+				" (6371 * ACOS( COS(RADIANS(?5)) * COS(RADIANS(LATITUDE)) * COS(RADIANS(LONGITUDE) - RADIANS(?6)) " +
+				"+ SIN(RADIANS(?5)) * SIN(RADIANS(LATITUDE)) )) AS DISTANCE " +
 				"FROM RESTAURANT WHERE (?1 IS NULL OR TYPE = ?1) " +
 				"AND ACTIVE = true " +
 				"AND DELETED = false " +
@@ -24,23 +26,11 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long>, J
 				"AND (?3 IS NULL OR PRICE_RANGE <= ?3) " +
 				"AND (?4 IS NULL OR RATING >= ?4) " +
 				"AND (?7 IS NULL OR LOWER(NAME) LIKE ?7) " +
-				"ORDER BY ?#{#pageable}"
+				"AND (6371 * ACOS( COS(RADIANS(?5)) * COS(RADIANS(LATITUDE)) * COS(RADIANS(LONGITUDE) - RADIANS(?6)) " +
+				"+ SIN(RADIANS(?5)) * SIN(RADIANS(LATITUDE)) )) <= ?8 "
 	)
-	Page<Restaurant> findAllWithFilters(String type, Integer minPrice, Integer maxPrice, Integer minRating, Double lat,
-										Double lng, String search, Pageable pageable);
-
-	@Query(
-			nativeQuery = true,
-			value = "SELECT *, 0 AS DIST " +
-					"FROM RESTAURANT WHERE (?1 IS NULL OR TYPE = ?1) " +
-					"AND ACTIVE = true " +
-					"AND DELETED = false " +
-					"AND (?2 IS NULL OR PRICE_RANGE >= ?2) " +
-					"AND (?3 IS NULL OR PRICE_RANGE <= ?3) " +
-					"AND (?4 IS NULL OR RATING >= ?4) " +
-					"AND (?5 IS NULL OR LOWER(NAME) LIKE ?5) "
-	)
-	Page<Restaurant> findAllWithFiltersLocal(String type, Integer minPrice, Integer maxPrice, Integer minRating, String search, Pageable pageable);
+	Page<Restaurant> findAllWithFilters(String type, Integer minPrice, Integer maxPrice, Integer minRating, double lat,
+										double lng, String search, int radius, Pageable pageable);
 
 	List<Restaurant> findByOwnerAndDeletedFalse(long owner);
 }

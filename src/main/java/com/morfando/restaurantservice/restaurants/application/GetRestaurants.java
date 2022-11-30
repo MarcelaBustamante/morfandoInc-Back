@@ -29,18 +29,14 @@ public class GetRestaurants {
 		Pageable pageable = PageRequest.of(filters.getPage(), filters.getPageSize());
 		String search = null !=  filters.getSearch() ? "%" +  filters.getSearch().toLowerCase() + "%" : null;
 		if (null != filters.getLatitude() && null != filters.getLongitude()) {
-			Sort sort = Sort.by(Sort.Direction.ASC, "DIST").and(pageable.getSort());
+			Sort sort = Sort.by(Sort.Direction.ASC, "DISTANCE").and(pageable.getSort());
 			pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
 		} else {
 			filters.setLongitude(0.0D);
 			filters.setLatitude(0.0D);
 		}
-		if (Arrays.asList(env.getActiveProfiles()).contains("h2")) {
-			return repo.findAllWithFiltersLocal(filters.getType(), filters.getMinPrice(), filters.getMaxPrice(),
-					filters.getRating(), search, pageable);
-		}
 		return repo.findAllWithFilters(filters.getType(), filters.getMinPrice(), filters.getMaxPrice(),
-				filters.getRating(), filters.getLatitude(), filters.getLongitude(), search, pageable);
+				filters.getRating(), filters.getLatitude(), filters.getLongitude(), search, filters.getRadius(), pageable);
 	}
 
 	public Restaurant getById(long id) {
