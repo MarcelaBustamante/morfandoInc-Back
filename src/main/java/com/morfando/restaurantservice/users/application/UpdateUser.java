@@ -21,10 +21,10 @@ public class UpdateUser {
             user.setName(name);
         }
         if (null != lastName) {
-            user.setName(lastName);
+            user.setLastName(lastName);
         }
         if (null != profilePicture) {
-            user.setName(profilePicture);
+            user.setProfilePicture(profilePicture);
         }
         return repo.save(user);
     }
