@@ -82,8 +82,8 @@ public class UsersController {
 	}
 
 	@GetMapping("/getfavourite/{user-id}/{restaurant-id}")
-	public void getFavourite(@PathVariable("user-id") long idUser,@PathVariable("restaurant-id") long idRestaurant) {
-		handleFavourite.getFavourite(idUser, getRestaurants.getById(idRestaurant));
+	public boolean getFavourite(@PathVariable("user-id") long idUser,@PathVariable("restaurant-id") long idRestaurant) {
+		return handleFavourite.getFavourite(idUser, getRestaurants.getById(idRestaurant));
 	}
 
 
