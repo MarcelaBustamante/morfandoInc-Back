@@ -81,4 +81,10 @@ public class UsersController {
 		handleFavourite.deleteFavourite(idUser, getRestaurants.getById(idRestaurant));
 	}
 
+	@GetMapping("/getfavourite/{user-id}/{restaurant-id}")
+	public void getFavourite(@PathVariable("user-id") long idUser,@PathVariable("restaurant-id") long idRestaurant) {
+		handleFavourite.getFavourite(idUser, getRestaurants.getById(idRestaurant));
+	}
+
+
 }

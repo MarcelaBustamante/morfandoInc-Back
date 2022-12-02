@@ -24,4 +24,17 @@ public class HandleFavourite {
 		user.getFavourites().remove(restaurant);
 		repo.save(user);
 	}
+
+	public boolean getFavourite(long idUser,Restaurant restaurant){
+		User user = repo.findById(idUser).orElseThrow();
+		boolean exists = false;
+		for(Restaurant resto : user.getFavourites()) {
+			if(resto.getId() == restaurant.getId()){
+				exists=true;
+				break;
+			}
+		}
+		return exists;
+
+	}
 }
